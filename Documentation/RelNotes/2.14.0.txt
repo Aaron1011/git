@@ -53,16 +53,16 @@ UI, Workflows & Features
    when the $sha1 names an object at the tip of an advertised ref,
    even when the other side hasn't enabled allowTipSHA1InWant.
 
- * The recently introduced "[includeIf "gitdir:$dir"] path=..."
-   mechanism has further been taught to take symlinks into account.
-   The directory "$dir" specified in "gitdir:$dir" may be a symlink to
-   a real location, not something that $(getcwd) may return.  In such
-   a case, a realpath of "$dir" is compared with the real path of the
-   current repository to determine if the contents from the named path
-   should be included.
+ * The "[includeIf "gitdir:$dir"] path=..." mechanism introduced in
+   2.13.0 would canonicalize the path of the gitdir being matched,
+   and did not match e.g. "gitdir:~/work/*" against a repo in
+   "~/work/main" if "~/work" was a symlink to "/mnt/storage/work".
+   Now we match both the resolved canonical path and what "pwd" would
+   show. The include will happen if either one matches.
 
- * Make the "indent" heuristics the default in "diff" and diff.indentHeuristics
-   configuration variable an escape hatch for those who do no want it.
+ * The "indent" heuristics is now the default in "diff". The
+   diff.indentHeuristic configuration variable can be set to "false"
+   for those who do not want it.
 
  * Many commands learned to pay attention to submodule.recurse
    configuration.
@@ -91,8 +91,8 @@ UI, Workflows & Features
    would appear as a not-quite-initialized submodule to others.  We
    learned to give warnings when this happens.
 
- * "git status" learned to optionally give how many stash entries the
-   user has in its output.
+ * "git status" learned to optionally give how many stash entries there
+   are in its output.
 
  * "git status" has long shown essentially the same message as "git
    commit"; the message it gives while preparing for the root commit,
@@ -101,9 +101,9 @@ UI, Workflows & Features
    (rather than the commit the user is preparing for, which is more in
    line with the focus of "git commit").
 
- * "git send-email" learned to overcome some SMTP server limitation
-   that does not allow many pieces of e-mails to be sent over a single
-   session.
+ * "git send-email" now has --batch-size and --relogin-delay options
+    which can be used to overcome limitations on SMTP servers that
+    restrict on how many of e-mails can be sent in a single session.
 
  * An old message shown in the commit log template was removed, as it
    has outlived its usefulness.
@@ -425,18 +425,16 @@ notes for details).
  * A recent regression in "git rebase -i" has been fixed and tests
    that would have caught it and others have been added.
 
- * An unaligned 32-bit access in pack-bitmap code ahs been corrected.
+ * An unaligned 32-bit access in pack-bitmap code has been corrected.
 
  * Tighten error checks for invalid "git apply" input.
 
- * The split index code did not honor core.sharedrepository setting
+ * The split index code did not honor core.sharedRepository setting
    correctly.
 
  * The Makefile rule in contrib/subtree for building documentation
    learned to honour USE_ASCIIDOCTOR just like the main documentation
    set does.
-
- * Update the sha1dc again to fix portability glitches.
 
  * Code clean-up to fix possible buffer over-reading.
    (merge 2d105451c0 rs/apply-avoid-over-reading later to maint).
